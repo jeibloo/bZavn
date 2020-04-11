@@ -1,2 +1,3 @@
-# buzzbuzzbuzz
+# 🐝buzzbuzzbuzz🐝
+
 Rudimentary binary fuzzer.
