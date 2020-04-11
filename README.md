@@ -1,0 +1,2 @@
+# buzzbuzzbuzz
+Rudimentary binary fuzzer.
