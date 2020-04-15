@@ -10,23 +10,24 @@ def stage(subj, m=1):
     elif subj.f_size[1] <= 500:
         data = subj.f_whole(binary=m)
 
-    core = atlas.data_c(data) # Create the data object
-
-    core.d_shred(micro=m) # Shred data
-    
-    core.d_data = core.d_convert_i2s(core.d_data)
-    core.d_data = core.d_assemble(d=core.d_data,binary=m)
-    core.d_save(foldername=subj.f_name, filetype=subj.f_extsn, session=subj.f_session)
+    for x in range(0,10):
+        core = atlas.data_c(data) # Create the data object
+        core.d_shred(micro=m) # Shred data
+        core.d_data = core.d_convert_i2s(core.d_data)
+        core.d_data = core.d_assemble(d=core.d_data,binary=m)
+        core.d_save(foldername=subj.f_name, count=x, filetype=subj.f_extsn, session=subj.f_session)
 
 def main(file):
-    subj = atlas.file_c(file) # Create object
-    subj.f_folder() # Make folder
+    # Arg check
     argtype = sys.argv[1]
-    # Check if it has the right args
     # TODO: -b should have number of bits -c should have percent
     if argtype != '-b' and argtype != '-c':
         print("\n\tNo good args: brute [-b] nor careful [-c] options chosen.\n")
         sys.exit(1)
+
+    subj = atlas.file_c(file) # Create object
+    subj.f_folder() # Make folder
+
     stage(subj, m=1)
     # Debug
     try:
@@ -39,7 +40,7 @@ if __name__ == "__main__":
     try:
         a = sys.argv[1]
     except IndexError:
-        print("Options: [-b -c] brute, careful , [filename]")
+        print("\n\tUsage: [-b -c] brute, careful , [filename]\n")
         sys.exit(0)
     try:
         a = sys.argv[2]

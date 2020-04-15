@@ -72,7 +72,6 @@ class data_c:
     def __init__(self, data):
         self.d_data = data
         self.d_len = len(data)
-        self.count = 0
     
     def d_shred(self, bitflips=2000, micro=0):
         '''
@@ -91,7 +90,6 @@ class data_c:
             if micro==0:
                 # Let the shuffle begin
                 pass
-        print("\n\t[*] MUTATED brutally")
     
     def d_scissor(self):
         '''
@@ -125,14 +123,13 @@ class data_c:
         '''
         return "".join([str(t) for t in d_list])
     
-    def d_save(self, foldername, filetype='.unknown', session='000', append=0):
+    def d_save(self, foldername, filetype='.unknown', session='000', count=0, append=0):
         '''
         Save malformed file to apropos folder.
         '''
         if append==0:
             with open(os.path.join(foldername,
-                      session+"_"+str(self.count) + filetype),'wb') as f:
+                      session+"_"+str(count) + filetype),'wb') as f:
                 f.write(self.d_data)
-            self.count =+ 1
         elif append==1:
             pass
