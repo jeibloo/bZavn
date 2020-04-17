@@ -57,7 +57,6 @@ class file_c:
         """
         Debug options.
         """
-        # May take a bit with large files
         orig_shasum = "".join(subprocess.run(["shasum"], stdout=subprocess.PIPE, text=True, input=f'{self.f_fullname}').stdout[:-2].split())
         print(f'''\n\t[-] TITLE: {self.f_fullname}\tSIZE: {self.f_size[0]} bytes
         \n\t[-] FILE SIGS: {self.f_types}
@@ -119,7 +118,7 @@ class data_c:
     
     def d_convert_i2s(self, d_list):
         '''
-        Converts a list of ints to one string.
+        Converts a list of ints (1's & 0's) to one string.
         '''
         return "".join([str(t) for t in d_list])
     
@@ -132,4 +131,5 @@ class data_c:
                       session+"_"+str(count) + filetype),'wb') as f:
                 f.write(self.d_data)
         elif append==1:
+            # TODO: If getting the file in fragments we go this way
             pass

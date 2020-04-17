@@ -1,52 +1,64 @@
 import atlas, sys, os, binascii, random, subprocess, time
 
-def stage(subj, m=1):
+def work(data, file, option=1, i=10):
+    for x in range(0, i):
+        core = atlas.data_c(data)   # Create data object
+        core.d_shred(micro=option)  # Shred data
+        # Convert list
+        core.d_data = core.d_convert_i2s(core.d_data)   
+        # Convert format
+        core.d_data = core.d_assemble(d=core.d_data,binary=option)
+        # Save file to folder
+        core.d_save(foldername=file.f_name, count=x, 
+                    filetype=file.f_extsn, session=file.f_session)
+
+def main(file, mesg, arg_dict):
     '''
-    Staging for work.
+    Execute the work and get down etc.
     '''
-    if subj.f_size[1] > 500:
-        data = subj.f_frags()
-        # TODO: Other stuff here?
-    elif subj.f_size[1] <= 500:
-        data = subj.f_whole(binary=m)
+    con = atlas.file_c(file)   # Create object
+    con.f_folder()             # Make folder
+    """if con.f_size[1] > 500:
+        data = con.f_frags()
+        # TODO: Execute work but with the fragmented data and then append etc
+    elif con.f_size[1] <= 500:
+        data = con.f_whole(binary=1)
+        work(data, subj=con)
+    """
+    work(data=con.f_whole(binary=1), file=con, option=1, i=int(arg_dict['atk_it']))
 
-    for x in range(0,10):
-        core = atlas.data_c(data) # Create the data object
-        core.d_shred(micro=m) # Shred data
-        core.d_data = core.d_convert_i2s(core.d_data)
-        core.d_data = core.d_assemble(d=core.d_data,binary=m)
-        core.d_save(foldername=subj.f_name, count=x, filetype=subj.f_extsn, session=subj.f_session)
-
-def main(file):
-    # Arg check
-    argtype = sys.argv[1]
-    # TODO: -b should have number of bits -c should have percent
-    if argtype != '-b' and argtype != '-c':
-        print("\n\tNo good args: brute [-b] nor careful [-c] options chosen.\n")
-        sys.exit(1)
-
-    subj = atlas.file_c(file) # Create object
-    subj.f_folder() # Make folder
-
-    stage(subj, m=1)
-    # Debug
-    try:
-        if sys.argv[3] and sys.argv[3] == '-d':
-            subj.f_debug()
-    except (IndexError, ValueError) as e:
-        print(f'{e} | {e.args}')
+    # DEBUG
+    if sys.argv and sys.argv[-1] == '-d':
+        con.f_debug()
 
 if __name__ == "__main__":
+    mesg = '\nUsage:\n [-s] shred, <iterations>, [-b] bits <number> | [-p] percentage <number>, [filename]'
+    file = 0
+    # SET DEBUG MODE & CHECK if file exists
     try:
-        a = sys.argv[1]
-    except IndexError:
-        print("\n\tUsage: [-b -c] brute, careful , [filename]\n")
-        sys.exit(0)
-    try:
-        a = sys.argv[2]
-        os.path.isfile(a)
-    except (IndexError, FileNotFoundError) as e:
-        print(f'{e} | {e.args}')
-        sys.exit(0)
+        if len(sys.argv) == 7:
+            file = sys.argv[-2]
+            print(f'DEBUG:\n {sys.argv} | {len(sys.argv)}')
+        else:
+            file = sys.argv[-1]
+    except FileNotFoundError:
+        print(usg_msg+' ....\n')
+        sys.exit(1) 
 
-    main(sys.argv[2])
+    # Attack type; Attack Iterations
+    # Measurement of Attack type; Measurement Actual
+    arg_dict = {'atk_tp' : sys.argv[1],
+                'atk_it' : sys.argv[2],
+                'msr_tp' : sys.argv[3],
+                'msr_at' : sys.argv[4]}
+
+    # CHECK args 
+    if (
+            arg_dict['atk_tp'] != '-s' and isinstance(arg_dict['atk_it'], int) and 
+            arg_dict['msr_tp'] != '-b' and arg_dict['msr_tp'] != '-p' and 
+            isinstance(arg_dict['msr_at'], int) and len(sys.argv) <= 5
+        ):
+        print(usg_msg+' .\n')
+        sys.exit(1)
+
+    main(file=file, mesg=mesg, arg_dict=arg_dict)
