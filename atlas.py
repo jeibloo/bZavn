@@ -18,26 +18,31 @@ class file_c:
     def f_frags(self):
         pass
     
-    def f_whole(self, binary=0):
+    def f_whole(self, hb_type=0):
         '''
         Simply gets whole file into memory at once.
         WARNING: will take lots of memory probably.
         '''
         with open(self.f_fullname, 'rb') as file:
-            if binary==0:
+            # Hex wanted
+            if hb_type == 0:
                 a = binascii.hexlify(file.read())
                 return list(a) # Gives int list of hexes [115, 100 ..etc
-            if binary==1:
+            # Binary wanted
+            elif hb_type == 1:
                 a = binascii.hexlify(file.read())
                 b = bin(int(a,16))[2:] # Gives giant string
                 return [int(n) for n in str(b)]
 
-    def f_folder(self, cleanup=0):
+    def f_folder(self, cleanup=0, shush=True):
         if cleanup==0:
             try:
                 os.mkdir(self.f_name)
             except (FileExistsError, OSError) as e:
-                print(f'{e} | {e.args}')
+                if shush:
+                    pass
+                else:
+                    print(f'{e} | {e.args}')
         if cleanup==1:
             try:
                 os.rmdir(self.f_name)
@@ -72,23 +77,24 @@ class data_c:
         self.d_data = data
         self.d_len = len(data)
     
-    def d_shred(self, bitflips=2000, micro=0):
+    def d_shred(self, bitflips=2000, hb_type=0):
         '''
         Take every X amount of bits and flip em'. Will
         cause something to break eventually.
-        - Does not need the type_finder method.
         '''
         for n in range(0, bitflips):
             pin = random.randrange(0, self.d_len)
-            if micro==1:
+            # Hex path
+            if hb_type == 0:
+                # TODO: Shift the hex in whatever direction
+                pass
+            # Binary path
+            elif hb_type == 1:
                 # Let the pinpricking begin
                 if self.d_data[pin] == 0:
                     self.d_data[pin] = 1
                 else:
                     self.d_data[pin] = 0
-            if micro==0:
-                # Let the shuffle begin
-                pass
     
     def d_scissor(self):
         '''
@@ -99,18 +105,19 @@ class data_c:
         # TODO: Stat analysis of file and take those ranges to fuzz
         print("\n\t[*] MUTATED carefully")
 
-    def d_assemble(self, d, binary=0):
+    def d_assemble(self, d, hb_type=0):
         '''
         Assembles the data into a writable format.
-        Binary variable determines if initial data passed in is binary or
-        hexadecimal.
+        hb_type determines if initial data passed in is binary or hexadecimal.
         '''
-        if binary==0:
+        # Hex was passed in 
+        if hb_type == 0:
             try:
                 return binascii.unhexlify(d)
             except binascii.Error as e:
                 print(f'Error with assembly: {e}')
-        elif binary==1:
+        # Binary was passed in
+        elif hb_type == 1:
             try:
                 return int(d,2).to_bytes(len(d)//8, byteorder='big')
             except (ValueError, TypeError) as e:
@@ -126,10 +133,12 @@ class data_c:
         '''
         Save malformed file to apropos folder.
         '''
-        if append==0:
+        # For f_whole
+        if append == 0:
             with open(os.path.join(foldername,
                       session+"_"+str(count) + filetype),'wb') as f:
                 f.write(self.d_data)
-        elif append==1:
+        # For f_frags
+        elif append == 1:
             # TODO: If getting the file in fragments we go this way
             pass

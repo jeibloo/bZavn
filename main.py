@@ -1,16 +1,19 @@
 import atlas, sys, os, binascii, random, subprocess, time
 
-def work(data, file, option=1, i=10):
+def work(data, file, flips, i, hb_type=1):
     for x in range(0, i):
-        core = atlas.data_c(data)   # Create data object
-        core.d_shred(micro=option)  # Shred data
+        core = atlas.data_c(data)
+        # Shred data
+        core.d_shred(bitflips=flips, hb_type=hb_type)
         # Convert list
         core.d_data = core.d_convert_i2s(core.d_data)   
-        # Convert format
-        core.d_data = core.d_assemble(d=core.d_data,binary=option)
+        # Convert format; if option == 0 then hex else binary passed in
+        core.d_data = core.d_assemble(d=core.d_data, hb_type=hb_type)
         # Save file to folder
         core.d_save(foldername=file.f_name, count=x, 
                     filetype=file.f_extsn, session=file.f_session)
+        # Idk if needed...
+        del core
 
 def main(file, mesg, arg_dict):
     '''
@@ -18,18 +21,21 @@ def main(file, mesg, arg_dict):
     '''
     con = atlas.file_c(file)   # Create object
     con.f_folder()             # Make folder
-    """if con.f_size[1] > 500:
-        data = con.f_frags()
-        # TODO: Execute work but with the fragmented data and then append etc
-    elif con.f_size[1] <= 500:
-        data = con.f_whole(binary=1)
-        work(data, subj=con)
-    """
-    work(data=con.f_whole(binary=1), file=con, option=1, i=int(arg_dict['atk_it']))
+    # TODO: Execute work but with the fragmented data and then append etc
+    work(
+        data=con.f_whole(hb_type=1),    # Load data in
+        file=con,                       # Attack file to function
+        flips=int(arg_dict['msr_at']),  # Set amount of flips/slides
+        hb_type=1,                      # Set if binary or hex type
+        i=int(arg_dict['atk_it'])       # Set amount of iterations
+        )
 
     # DEBUG
     if sys.argv and sys.argv[-1] == '-d':
         con.f_debug()
+    
+    # FILE HOCKEY!
+    return con.f_name
 
 if __name__ == "__main__":
     mesg = '\nUsage:\n [-s] shred, <iterations>, [-b] bits <number> | [-p] percentage <number>, [filename]'
