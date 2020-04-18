@@ -5,14 +5,14 @@ class file_c:
     Dealing with the file from the filesystem.
     '''
     def __init__(self, filename):
-        self.f_fullname = filename
-        sz = os.path.getsize(self.f_fullname)
-        self.f_size = [sz, sz*.00001]
-        f_file = os.path.splitext(self.f_fullname)
-        self.f_name = f_file[0]
-        self.f_extsn = f_file[-1]
+        self.f_fullname = filename                  # blah.jpg
+        sz = os.path.getsize(self.f_fullname)       # bytes
+        self.f_size = [sz, sz*.001]                 # kilobytes
+        f_file = os.path.splitext(self.f_fullname)  # ['blah', 'jpg']
+        self.f_name = f_file[0]                     # 'blah'
+        self.f_extsn = f_file[-1]                   # 'jpg'
         self.f_types = {}
-        self.f_session = str(int(time.time()))
+        self.f_session = str(int(time.time()))      # longass string
         self.pos_bytes = 0 # For get_frags
 
     def f_frags(self):
@@ -82,6 +82,7 @@ class data_c:
         Take every X amount of bits and flip em'. Will
         cause something to break eventually.
         '''
+        # TODO: Maybe make a special terrible no-good hex list?
         for n in range(0, bitflips):
             pin = random.randrange(0, self.d_len)
             # Hex path
@@ -95,6 +96,8 @@ class data_c:
                     self.d_data[pin] = 1
                 else:
                     self.d_data[pin] = 0
+
+        return 0
     
     def d_scissor(self):
         '''
@@ -122,6 +125,8 @@ class data_c:
                 return int(d,2).to_bytes(len(d)//8, byteorder='big')
             except (ValueError, TypeError) as e:
                 print(f'{e}')
+        
+        return 0
     
     def d_convert_i2s(self, d_list):
         '''
@@ -133,12 +138,21 @@ class data_c:
         '''
         Save malformed file to apropos folder.
         '''
+        self.newname = f'{session}_{str(count)}{filetype}'
         # For f_whole
         if append == 0:
-            with open(os.path.join(foldername,
-                      session+"_"+str(count) + filetype),'wb') as f:
+            with open(os.path.join(foldername, self.newname), 'wb') as f:
                 f.write(self.d_data)
         # For f_frags
         elif append == 1:
             # TODO: If getting the file in fragments we go this way
             pass
+
+        return self.newname
+    
+    def d_delete(self, foldername, filename):
+        '''
+        Deletes uneeded file.
+        '''
+        os.remove(f'{foldername}/{filename}')
+        return 0
